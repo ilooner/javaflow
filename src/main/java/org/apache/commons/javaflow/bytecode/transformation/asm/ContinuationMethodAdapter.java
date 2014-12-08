@@ -33,6 +33,20 @@ public final class ContinuationMethodAdapter extends MethodVisitor implements Op
     private static final String STACK_RECORDER = Type.getInternalName(StackRecorder.class);
     private static final String POP_METHOD = "pop";
     private static final String PUSH_METHOD = "push";
+    
+    private static final String[] SUFFIXES = {
+        "Object",  // 0 void
+        "Int",     // 1 boolean
+        "Int",     // 2 char
+        "Int",     // 3 byte
+        "Int",     // 4 short
+        "Int",     // 5 int
+        "Float",   // 6 float
+        "Long",    // 7 long
+        "Double",  // 8 double
+        "Object",  // 9 array
+        "Object",  // 10 object
+    };
 
     private final ContinuationMethodAnalyzer canalyzer;
     private final Analyzer analyzer;
@@ -58,6 +72,7 @@ public final class ContinuationMethodAdapter extends MethodVisitor implements Op
         this.methodDesc = a.desc;
     }
 
+    @Override
     public void visitCode() {
         mv.visitCode();
 
@@ -189,6 +204,7 @@ public final class ContinuationMethodAdapter extends MethodVisitor implements Op
         mv.visitLabel(l0);
     }
 
+    @Override
     public void visitLabel(Label label) {
         if (currentIndex < labels.size() && label == labels.get(currentIndex)) {
             int i = canalyzer.getIndex(nodes.get(currentIndex));
@@ -197,6 +213,7 @@ public final class ContinuationMethodAdapter extends MethodVisitor implements Op
         mv.visitLabel(label);
     }
 
+    @Override
     public void visitMethodInsn(int opcode, String owner, String name, String desc) {
         mv.visitMethodInsn(opcode, owner, name, desc);
 
@@ -303,7 +320,7 @@ public final class ContinuationMethodAdapter extends MethodVisitor implements Op
         }
     }
 
-
+    @Override
     public void visitMaxs(int maxStack, int maxLocals) {
         Label endLabel = new Label();
         mv.visitLabel(endLabel);
@@ -346,21 +363,6 @@ public final class ContinuationMethodAdapter extends MethodVisitor implements Op
             break;
         }
     }
-
-    private static String[] SUFFIXES = {
-        "Object",  // 0 void
-        "Int",     // 1 boolean
-        "Int",     // 2 char
-        "Int",     // 3 byte
-        "Int",     // 4 short
-        "Int",     // 5 int
-        "Float",   // 6 float
-        "Long",    // 7 long
-        "Double",  // 8 double
-        "Object",  // 9 array
-        "Object",  // 10 object
-    };
-
 
     String getPopMethod(Type type) {
         return POP_METHOD + SUFFIXES[type.getSort()];
